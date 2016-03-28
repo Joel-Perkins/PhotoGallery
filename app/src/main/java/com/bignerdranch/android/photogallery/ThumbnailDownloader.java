@@ -14,13 +14,13 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Created by Joel on 3/27/2016.
  */
-public class ThumbnailDownloader<T> extends HandlerThread{
+public class ThumbnailDownloader<T> extends HandlerThread {
 
     private static final String TAG = "ThumbnailDownloader";
     private static final int MESSAGE_DOWNLOAD = 0;
 
     private Handler mRequestHandler;
-    private ConcurrentMap<T,String> mRequestMap = new ConcurrentHashMap<>();
+    private ConcurrentMap<T, String> mRequestMap = new ConcurrentHashMap<>();
     private Handler mResponseHandler;
     private ThumbnaildownloadListener<T> mThumbnailDownloadListener;
 
@@ -28,11 +28,11 @@ public class ThumbnailDownloader<T> extends HandlerThread{
         void onThumbnailDownloaded(T target, Bitmap thumbnail);
     }
 
-    public void setThumbnailDownloadListener(ThumbnaildownloadListener listener){
+    public void setThumbnailDownloadListener(ThumbnaildownloadListener listener) {
         mThumbnailDownloadListener = listener;
     }
 
-    public ThumbnailDownloader(Handler responseHandler){
+    public ThumbnailDownloader(Handler responseHandler) {
         super(TAG);
         mResponseHandler = responseHandler;
     }
@@ -43,7 +43,7 @@ public class ThumbnailDownloader<T> extends HandlerThread{
 
             @Override
             public void handleMessage(Message msg) {
-                if(msg.what == MESSAGE_DOWNLOAD){
+                if (msg.what == MESSAGE_DOWNLOAD) {
                     T target = (T) msg.obj;
                     Log.i(TAG, "Got a request for URL: " + mRequestMap.get(target));
                     handleRequest(target);
@@ -52,9 +52,9 @@ public class ThumbnailDownloader<T> extends HandlerThread{
         };
     }
 
-    public void queueThumbnail(T target, String url){
+    public void queueThumbnail(T target, String url) {
         Log.i(TAG, "Got a URL: " + url);
-        if(url == null){
+        if (url == null) {
             mRequestMap.remove(target);
         } else {
             mRequestMap.put(target, url);
@@ -62,15 +62,15 @@ public class ThumbnailDownloader<T> extends HandlerThread{
         }
     }
 
-    public void clearQueue(){
+    public void clearQueue() {
         mRequestHandler.removeMessages(MESSAGE_DOWNLOAD);
     }
 
-    private void handleRequest(final T target){
-        try{
+    private void handleRequest(final T target) {
+        try {
             final String url = mRequestMap.get(target);
 
-            if(url == null){
+            if (url == null) {
                 return;
             }
 
@@ -89,7 +89,7 @@ public class ThumbnailDownloader<T> extends HandlerThread{
                 }
             });
 
-        } catch(IOException ioe) {
+        } catch (IOException ioe) {
             Log.e(TAG, "Error downloading image", ioe);
         }
     }

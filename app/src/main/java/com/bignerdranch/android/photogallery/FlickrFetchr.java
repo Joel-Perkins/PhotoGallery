@@ -67,12 +67,12 @@ public class FlickrFetchr {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public List<GalleryItem> fetchRecentPhotos(int pageNum){
+    public List<GalleryItem> fetchRecentPhotos(int pageNum) {
         String url = buildUrl(FETCH_RECENTS_METHOD, null, pageNum);
         return downloadGalleryItems(url);
     }
 
-    public List<GalleryItem> searchPhotos(String query,int pageNum){
+    public List<GalleryItem> searchPhotos(String query, int pageNum) {
         String url = buildUrl(SEARCH_METHOD, query, pageNum);
         return downloadGalleryItems(url);
     }
@@ -103,12 +103,12 @@ public class FlickrFetchr {
         return items;
     }
 
-    private String buildUrl(String method, String query, int pageNum){
+    private String buildUrl(String method, String query, int pageNum) {
         Uri.Builder uriBuilder = ENDPOINT.buildUpon()
                 .appendQueryParameter("method", method)
                 .appendQueryParameter("page", Integer.toString(pageNum));
 
-        if (method.equals(SEARCH_METHOD)){
+        if (method.equals(SEARCH_METHOD)) {
             uriBuilder.appendQueryParameter("text", query);
         }
 
@@ -119,14 +119,14 @@ public class FlickrFetchr {
         JSONObject photosJsonObject = jsonBody.getJSONObject("photos");
         JSONArray photoJsonArray = photosJsonObject.getJSONArray("photo");
 
-        for(int i = 0; i < photoJsonArray.length(); i++){
+        for (int i = 0; i < photoJsonArray.length(); i++) {
             JSONObject photoJsonObject = photoJsonArray.getJSONObject(i);
 
             GalleryItem item = new GalleryItem();
             item.setId(photoJsonObject.getString("id"));
             item.setCaption(photoJsonObject.getString("title"));
 
-            if(!photoJsonObject.has("url_s")){
+            if (!photoJsonObject.has("url_s")) {
                 continue;
             }
 
