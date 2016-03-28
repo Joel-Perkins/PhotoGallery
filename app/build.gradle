@@ -27,4 +27,7 @@ dependencies {
 
     // JSON utility library.
     compile 'com.google.code.gson:gson:2.4'
+
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.squareup.okhttp:okhttp:2.4.0'
 }
