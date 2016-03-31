@@ -1,5 +1,6 @@
 package com.bignerdranch.android.photogallery;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -39,8 +40,9 @@ public class PhotoGalleryFragment extends Fragment {
     private List<GalleryItem> mItems = new ArrayList<>();
     //    private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
     private int pageNum = 1;
-    private int lastBindPosition = -1;
+    private int lastBindPosition = 0;
     private int numColumns = 3;
+    private String prevResultString = "";
 
     public static PhotoGalleryFragment newInstance() {
         return new PhotoGalleryFragment();
@@ -52,7 +54,9 @@ public class PhotoGalleryFragment extends Fragment {
         setRetainInstance(true);
         setHasOptionsMenu(true);
 
-        Handler responseHandler = new Handler();
+        updateItems();
+
+//        Handler responseHandler = new Handler();
 //        mThumbnailDownloader = new ThumbnailDownloader<>(responseHandler);
 //        mThumbnailDownloader.setThumbnailDownloadListener(new ThumbnailDownloader.ThumbnaildownloadListener<PhotoHolder>() {
 //            @Override
@@ -108,7 +112,7 @@ public class PhotoGalleryFragment extends Fragment {
                     }
                 });
 
-        setupAdapter();
+//        setupAdapter();
 
         return view;
     }
@@ -159,6 +163,13 @@ public class PhotoGalleryFragment extends Fragment {
                 searchView.setQuery(query, false);
             }
         });
+
+        MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
+        if(PollService.isServiceAlarmOn(getActivity())){
+            toggleItem.setTitle(R.string.stop_polling);
+        } else {
+            toggleItem.setTitle(R.string.start_polling);
+        }
     }
 
     @Override
@@ -167,6 +178,11 @@ public class PhotoGalleryFragment extends Fragment {
             case R.id.menu_item_clear:
                 QueryPreferences.setStoredQuery(getActivity(), null);
                 updateItems();
+                return true;
+            case R.id.menu_item_toggle_polling:
+                boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
+                PollService.setServiceAlarm(getActivity(), shouldStartAlarm);
+                getActivity().invalidateOptionsMenu();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -187,7 +203,9 @@ public class PhotoGalleryFragment extends Fragment {
                 mPhotoRecyclerView.setAdapter(rvAdapter);
             } else {
                 lastBindPosition = ((PhotoAdapter) rvAdapter).getLastBindPosition() - 1;
-                rvAdapter.notifyDataSetChanged();
+//                rvAdapter.notifyDataSetChanged();
+                rvAdapter = new PhotoAdapter(mItems);
+                mPhotoRecyclerView.setAdapter(rvAdapter);
                 mPhotoRecyclerView.scrollToPosition(lastBindPosition);
             }
         }
@@ -213,8 +231,14 @@ public class PhotoGalleryFragment extends Fragment {
 
         @Override
         protected void onPostExecute(List<GalleryItem> items) {
-            mItems.addAll(items);
+            if(mQuery.equals(prevResultString)){
+                mItems.addAll(items);
+//                mItems = items;
+            } else {
+                mItems = items;
+            }
             setupAdapter();
+            prevResultString = mQuery;
         }
     }
 
@@ -243,7 +267,7 @@ public class PhotoGalleryFragment extends Fragment {
 
         private List<GalleryItem> mGalleryItems;
 
-        private int lastBindPosition = -1;
+        private int lastBindPosition = 1;
 
         public PhotoAdapter(List<GalleryItem> galleryItems) {
             mGalleryItems = galleryItems;

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,6 +14,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -81,15 +83,6 @@ public class FlickrFetchr {
 
         List<GalleryItem> items = new ArrayList<>();
         try {
-//            String url = Uri.parse("https://api.flickr.com/services/rest/")
-//                    .buildUpon()
-//                    .appendQueryParameter("method", "flickr.photos.getRecent")
-//                    .appendQueryParameter("api_key", API_KEY)
-//                    .appendQueryParameter("format", "json")
-//                    .appendQueryParameter("nojsoncallback", "1")
-//                    .appendQueryParameter("extras", "url_s")
-//                    .appendQueryParameter("page", Integer.toString(pageNum))
-//                    .build().toString();
             String jsonString = getUrlString(url);
             Log.i(TAG, "Received JSON: " + jsonString);
             JSONObject jsonBody = new JSONObject(jsonString);
@@ -137,10 +130,12 @@ public class FlickrFetchr {
 
     private List<GalleryItem> parseGsonItems(JSONObject jsonBody)
             throws JSONException {
-        Gson gson = new GsonBuilder().create();
         JSONObject photosJsonObject = jsonBody.getJSONObject("photos");
         JSONArray photoJsonArray = photosJsonObject.getJSONArray("photo");
-        return Arrays.asList(gson.fromJson(photoJsonArray.toString(), GalleryItem[].class));
+        Type listType = new TypeToken<ArrayList<GalleryItem>>() {
+        }.getType();
+        List<GalleryItem> yourClassList = new Gson().fromJson(photoJsonArray.toString(), listType);
+        return yourClassList;
     }
 
 }
