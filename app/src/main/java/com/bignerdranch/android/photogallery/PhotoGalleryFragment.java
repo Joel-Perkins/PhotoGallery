@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -30,7 +29,7 @@ import java.util.List;
  * Commented out code is kept for reference on how to manually fetch images instead of using a
  * library such as Picasso.
  */
-public class PhotoGalleryFragment extends Fragment {
+public class PhotoGalleryFragment extends VisibleFragment {
 
     private static final String TAG = "PhotoGalleryFragment";
     private static final int COLUMN_WIDTH = 150;
@@ -242,13 +241,18 @@ public class PhotoGalleryFragment extends Fragment {
         }
     }
 
-    private class PhotoHolder extends RecyclerView.ViewHolder {
+    /**
+     * Photo Holder
+     */
+    private class PhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         private ImageView mItemImageView;
+        private GalleryItem mGalleryItem;
 
         public PhotoHolder(View itemView) {
             super(itemView);
             mItemImageView = (ImageView) itemView.findViewById(R.id.fragment_photo_gallery_image_view);
+            mItemImageView.setOnClickListener(this);
         }
 
         public void bindDrawable(Drawable drawable) {
@@ -256,13 +260,23 @@ public class PhotoGalleryFragment extends Fragment {
         }
 
         public void bindGalleryItem(GalleryItem galleryItem) {
+            mGalleryItem = galleryItem;
             Picasso.with(getActivity())
                     .load(galleryItem.getUrl())
                     .placeholder(R.drawable.loading_image)
                     .into(mItemImageView);
         }
+
+        @Override
+        public void onClick(View v) {
+            Intent i = new Intent(Intent.ACTION_VIEW, mGalleryItem.getPhotoPageUri());
+            startActivity(i);
+        }
     }
 
+    /**
+     * Photo Adapter
+     */
     private class PhotoAdapter extends RecyclerView.Adapter<PhotoHolder> {
 
         private List<GalleryItem> mGalleryItems;
